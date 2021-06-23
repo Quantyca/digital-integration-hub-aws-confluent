@@ -79,8 +79,6 @@ function create_tfvars_file {
 ssh_user                = "dc01"
 ssh_password            = "$VM_PASSWORD"
 vm_host                 = "$VM_HOST"
-region                 = "$AWS_REGION"
-accountId                 = "$AWS_ACCOUNT_ID"
 EOF
 
 }

@@ -57,7 +57,7 @@ ccloud::wait_for_data_in_topic() {
 
 
 function get_hybrid_workshop_repo() {
-    local GIT_BRANCH="dynamodb-extension"
+    local GIT_BRANCH="master"
     local GIT_REPO="confluentinc/confluent-hybrid-cloud-workshop"
     WS_REPO_FOLDER=$DIR_DEMO_HELPER/confluent-hybrid-cloud-workshop
     [[ -d "$WS_REPO_FOLDER" ]] || git clone https://github.com/${GIT_REPO}.git $WS_REPO_FOLDER

@@ -5,7 +5,7 @@ from boto3.dynamodb.conditions import Key, Attr
 def lambda_handler(event, context):
     dynamodb = boto3.resource('dynamodb')
     
-    table = dynamodb.Table('confluentdib-orders-table-wkr')
+    table = dynamodb.Table('${dynamodb_table_name}')
     
     fe = Attr('CUSTOMER_ID').eq(event['customer_id'])
     response = table.scan(

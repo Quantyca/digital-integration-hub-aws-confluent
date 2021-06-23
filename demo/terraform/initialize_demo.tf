@@ -1,3 +1,13 @@
+####### Referencing other terraform output ######
+
+data "terraform_remote_state" "workshop" {
+  backend = "local"
+
+  config = {
+    path = "${path.module}/../tmp/.terraform_staging/terraform.tfstate"
+  }
+}
+
 resource "null_resource" "init_demo" {
 
 // Copy init_demo script to the VM
@@ -77,17 +87,28 @@ resource "null_resource" "init_demo" {
 
 ####### AWS Lambda ###########
 
+resource "random_string" "lambda_func_random_string" {
+  length = 4
+  special = false
+  upper = false
+  lower = true
+  number = false
+}
+
+
 data "archive_file" "lambda_zip_file" {
   type        = "zip"
   output_path = "../tmp/get_customer_360.zip"
   source {
-    content  = file(var.lambda_file_data)
+    content  = templatefile("${path.module}/get_customer_360.py.tpl", { 
+      dynamodb_table_name = data.terraform_remote_state.workshop.outputs.dynamodb_table_name
+    })
     filename = "lambda_function.py"
   }
 }
 
 resource "aws_iam_role" "iam_for_lambda" {
-  name = "iam_for_lambda-confluent-demo"
+  name = "iam_for_lambda-confluent-demo-${random_string.lambda_func_random_string.result}"
 
   assume_role_policy = <<EOF
 {
@@ -113,7 +134,7 @@ resource "aws_iam_role_policy_attachment" "attach" {
 
 resource "aws_lambda_function" "get_customer_360" {
   filename         = data.archive_file.lambda_zip_file.output_path
-  function_name    = "get_customer_360"
+  function_name    = "get_customer_360_${random_string.lambda_func_random_string.result}"
   role             = aws_iam_role.iam_for_lambda.arn
   source_code_hash = filebase64sha256(data.archive_file.lambda_zip_file.output_path)
   handler          = "lambda_function.lambda_handler"
@@ -124,7 +145,7 @@ resource "aws_lambda_function" "get_customer_360" {
 ####### API Gateway Integration ###########
 
 resource "aws_api_gateway_rest_api" "api" {
-  name = "demo-aws-confluent-api"
+  name = "demo-aws-confluent-api-${random_string.lambda_func_random_string.result}"
   binary_media_types = ["*/*"]
   
   endpoint_configuration {
@@ -133,7 +154,7 @@ resource "aws_api_gateway_rest_api" "api" {
 }
 
 resource "aws_api_gateway_resource" "resource" {
-  path_part   = "get_customer_360"
+  path_part   = "get_customer_360_${random_string.lambda_func_random_string.result}"
   parent_id   = aws_api_gateway_rest_api.api.root_resource_id
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
@@ -178,8 +199,12 @@ resource "aws_lambda_permission" "apigw_lambda" {
   principal     = "apigateway.amazonaws.com"
 
   # More: http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.html
-  source_arn = "arn:aws:execute-api:${var.region}:${var.accountId}:${aws_api_gateway_rest_api.api.id}/*/${aws_api_gateway_method.method.http_method}${aws_api_gateway_resource.resource.path}"
+  source_arn = "${aws_api_gateway_rest_api.api.execution_arn}/*/${aws_api_gateway_method.method.http_method}${aws_api_gateway_resource.resource.path}"
 }
+
+
+
+
 
 ####### Variables ###########
 
@@ -195,15 +220,6 @@ variable "vm_host" {
   description = "VM HOST , will be used to ssh"
 }
 
-variable "region" {
-}
-
-variable "accountId" {
-}
-
-variable "lambda_file_data" {
-  default = "./get_customer_360.py"
-}
 
 
 

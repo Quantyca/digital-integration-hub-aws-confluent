@@ -390,7 +390,7 @@ curl -i -X POST -H "Accept:application/json" \
         "config": {
           "connector.class":"io.confluent.connect.aws.dynamodb.DynamoDbSinkConnector",
           "tasks.max":"1",
-          "topics":"dc01_sales_enriched,dc01_purchases_enriched",
+          "topics":"dc01_sales_enriched",
           "aws.dynamodb.region":"${file:/secrets.properties:DYNAMODB_REGION}",
           "aws.dynamodb.endpoint":"${file:/secrets.properties:DYNAMODB_ENDPOINT}",
           "table.name.format":"${file:/secrets.properties:DYNAMODB_TABLENAME}",

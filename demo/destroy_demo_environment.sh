@@ -35,15 +35,15 @@ function destroy_ccloud_resources (){
 
 function destroy_infrastructure (){
 
-    cd $WS_REPO_FOLDER
-    ./workshop-destroy.py --dir $TMP_FOLDER
-
-    rm $TMP_FOLDER/workshop.yaml
-
     cd $TFS_PATH
     terraform destroy --auto-approve
 
     rm -f "${TFS_PATH}/config.auto.tfvars"
+
+    cd $WS_REPO_FOLDER
+    ./workshop-destroy.py --dir $TMP_FOLDER
+
+    rm $TMP_FOLDER/workshop.yaml
 
 }
 
@@ -57,10 +57,12 @@ function end_demo {
   
   check_jq || exit 1
 
-  destroy_ccloud_resources
+  
 
   get_hybrid_workshop_repo
   destroy_infrastructure  
+
+  destroy_ccloud_resources
  
   #rm -f "${TMP_FOLDER}/cluster_1.client.config"
 
