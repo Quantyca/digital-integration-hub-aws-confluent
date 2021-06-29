@@ -298,7 +298,8 @@ CREATE TABLE product_demand_last_3mins_tbl WITH (PARTITIONS = 1, KAFKA_TOPIC = '
 AS SELECT
       timestamptostring(windowStart,'HH:mm:ss') "WINDOW_START_TIME"
     , timestamptostring(windowEnd,'HH:mm:ss') "WINDOW_END_TIME"
-    , product_id
+    , product_id AS product_id_key
+    , AS_VALUE(product_id) AS product_id
     , SUM(product_qty) "DEMAND_LAST_3MINS"
 FROM sales_enriched
 WINDOW HOPPING (SIZE 3 MINUTES, ADVANCE BY 1 MINUTE)
@@ -328,7 +329,8 @@ docker-compose exec -T ksqldb-cli ksql http://ksqldb-server-ccloud:8088 << EOF
 SET 'auto.offset.reset' = 'latest';
 CREATE STREAM out_of_stock_events WITH (PARTITIONS = 1, KAFKA_TOPIC = 'dc01_out_of_stock_events')
 AS SELECT
-  cs.product_id "PRODUCT_ID",
+  cs.product_id "PRODUCT_ID_KEY",
+  AS_VALUE(cs.product_id) AS product_id,
   pd.window_start_time,
   pd.window_end_time,
   cs.stock_level,
