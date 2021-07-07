@@ -31,7 +31,7 @@ workshop:
     ccloud_api_secret: ${CLOUD_SECRET}
 
     # List of ccloud topics to pre-create
-    ccloud_topics: sales_orders,sales_order_details,purchase_orders,purchase_order_details,customers,suppliers,products,mdb.demo.estore
+    ccloud_topics: sales_orders,sales_order_details,purchase_orders,purchase_order_details,customers,suppliers,products
     onprem_topics: dc01_out_of_stock_events
 
 

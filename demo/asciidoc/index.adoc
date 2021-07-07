@@ -7,7 +7,7 @@
 Gianluca Natali <gnatali@confluent.io>; Matteo Cimini
 v0.1, June 18, 2021
 
-image::./architecture.png[Diagram of what's being built with this Demo]
+image::./architecture2.png[Diagram of what's being built with this Demo]
 
 == Introduction
 Hybrid Cloud is a reality in modern IT architectures.
